@@ -37,6 +37,7 @@ public class MainFrame extends JFrame {
     private final JTextField textFieldTo;
     private final JTextArea textAreaIncoming;
     private final JTextArea textAreaOutgoing;
+
     public MainFrame() {
         super(FRAME_TITLE);
         setMinimumSize(
@@ -79,7 +80,7 @@ public class MainFrame extends JFrame {
         messagePanel.setLayout(layout2);
         layout2.setHorizontalGroup(layout2.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout2.createParallelGroup(Alignment.TRAILING)
+                .addGroup(layout2.createParallelGroup(GroupLayout.Alignment.TRAILING)
                         .addGroup(layout2.createSequentialGroup()
                                 .addComponent(labelFrom)
                                 .addGap(SMALL_GAP)
@@ -93,7 +94,7 @@ public class MainFrame extends JFrame {
                 .addContainerGap());
         layout2.setVerticalGroup(layout2.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout2.createParallelGroup(Alignment.BASELINE)
+                .addGroup(layout2.createParallelGroup(GroupLayout.Alignment.TRAILING)
                         .addComponent(labelFrom)
                         .addComponent(textFieldFrom)
                         .addComponent(labelTo)
@@ -155,6 +156,25 @@ public class MainFrame extends JFrame {
             }
         }).start();
     }
+
+    private boolean isWrong(String address) {
+        String[] parts = address.split(".");
+        if (parts.length != 4) {
+            return true;
+        }
+        for (String part : parts) {
+            try {
+                int num = Integer.parseInt(part);
+                if (num < 0 || num > 255) {
+                    return true;
+                }
+            } catch (NumberFormatException ex) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void sendMessage() {
         try {
 // Получаем необходимые параметры
@@ -180,6 +200,14 @@ public class MainFrame extends JFrame {
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            //проверяем корректность ввода адреса получателя
+            if (isWrong(destinationAddress)) {
+                JOptionPane.showMessageDialog(this,
+                        "Адрес получателя введен неверно", "Ошибка",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
 // Создаем сокет для соединения
             final Socket socket =
                     new Socket(destinationAddress, SERVER_PORT);
@@ -209,6 +237,7 @@ public class MainFrame extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
         }
     }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -219,3 +248,4 @@ public class MainFrame extends JFrame {
             }
         });
     }
+}
